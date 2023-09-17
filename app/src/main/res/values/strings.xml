@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SudokuSolver</string>
+    <string name="test">T</string>
 </resources>
