@@ -52,15 +52,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SudokuLayout( modifier: Modifier = Modifier) {
     val configuration = LocalConfiguration.current
-
     val screenHeight = configuration.screenHeightDp //.dp
     val screenWidth = configuration.screenWidthDp //.dp
-    var tileSize = 25
-    tileSize = if(screenHeight>screenWidth){
+    val tileSize = if(screenHeight>screenWidth){
         (screenWidth / 9 - 3 * 2) //.roundToInt()
     } else{
         (screenHeight / 9 - 3 * 2) //.roundToInt()
     }
+    val fieldSize : Int =8 // size of the NxN field for the tiles, 9= means 10 x 10, which is need for the row and column indicators
+    val tile = Array<Tile?>((fieldSize+1)*(fieldSize+1)){null}//Array<Tile> = emptyArray()//(fieldSize) {fieldSize}
     // var result by remember { mutableStateOf(1) }
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -72,26 +72,31 @@ fun SudokuLayout( modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            for (l: Int in 1..9) {
+            for (l: Int in 0..fieldSize) {
                 Column(
                     modifier = modifier,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    for (m: Int in 1..9) {
-                        NumberField(
+                    for (m: Int in 0..fieldSize) {
+                        tile[(l)*(fieldSize+1)+(m)] =  Tile(intArrayOf(m,l))
+                        tile[(l)*(fieldSize+1)+(m)]?.NumberField(
+                            number = (l)*(fieldSize+1)+(m),
+                            tileSize = tileSize,
+                            onSurfaceClick = { popupNumberSelection() })
+                        /* NumberField(
                             onSurfaceClick = {
                                 //text = (1..9).random()
                             },
                             number = l, //(1..9).random()
                             tileSize = tileSize,
-                        )
-                        if (m % 3 == 0) {
+                        )*/
+                        if ( (m+1) % 3 == 0) {
                             Spacer(modifier = Modifier.height(2.dp))
                         }
 
                     }
                 }
-                if (l % 3 == 0) {
+                if ( (l+1) % 3 == 0) {
                     Spacer(modifier = Modifier.width(2.dp))
                 }
             }
@@ -100,40 +105,43 @@ fun SudokuLayout( modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun NumberField(
-    number: Int ,
-    tileSize: Int,
-    onSurfaceClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = Modifier
-            .clickable { onSurfaceClick() }
-            .size(tileSize.dp, tileSize.dp)
+class Tile(identifier: IntArray) {
+    val identifier:IntArray = intArrayOf(0,0)
+    var number: Int = 0
+    var text: String = "1 2 3\n 4 5 6 \n 7 8 9"
+    var isChangeable: Boolean = true
 
-
+    @Composable
+    fun NumberField(
+        number: Int ,
+        tileSize: Int,
+        onSurfaceClick: () -> Unit,
+        modifier: Modifier = Modifier
     ) {
-        Text(modifier = Modifier
-            .border(
-                BorderStroke(2.dp, Color(0, 0, 0, 255)),
-                //shape = AbsoluteCutCornerShape(2.dp)
-            ),
-            textAlign = TextAlign.Center ,
-            text = number.toString(),
-
-        )
-
+        Surface(
+            modifier = Modifier
+                .clickable { onSurfaceClick() }
+                .size(tileSize.dp, tileSize.dp),
+        ) {
+            Text(modifier = Modifier
+                .border(
+                    BorderStroke(2.dp, Color(0, 0, 0, 255)),
+                    //shape = AbsoluteCutCornerShape(2.dp)
+                ),
+                textAlign = TextAlign.Center ,
+                text = number.toString(),
+            )
+        }
     }
+}
 
+fun popupNumberSelection(){
 
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun SudokuPreview() {
     SudokuSolverTheme {
         SudokuLayout()
     }
